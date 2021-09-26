@@ -13,7 +13,7 @@ class Dispatcher:
         :param input_str:
         :return:
         """
-        return False
+        return True
 
     def process(self, input_str: str) -> Transaction:
         """

@@ -12,3 +12,4 @@ tmp/
 .eggs
 venv
 */.pytest_cache
+tmp.bean
