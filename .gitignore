@@ -1,0 +1,14 @@
+*.py[cod]
+*.db
+.idea
+.vscode
+dist/
+build/
+.python-version
+.DS_Store
+*debug.sh
+env
+tmp/
+.eggs
+venv
+*/.pytest_cache
