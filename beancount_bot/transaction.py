@@ -13,6 +13,10 @@ META_TIME = 'tgbot_time'
 Uuid = str
 
 
+class NotMatchException(BaseException):
+    pass
+
+
 class TransactionManager:
     """
     交易信息管理
@@ -33,7 +37,7 @@ class TransactionManager:
         tx.meta[META_UUID] = tx_uuid
         tx.meta[META_TIME] = str(datetime.datetime.now())
         # 保存至账本
-        with open(self.__bean_file, 'a+') as f:
+        with open(self.__bean_file, 'a+', encoding='utf-8') as f:
             printer.print_entry(tx, file=f)
         return tx_uuid, tx
 
@@ -83,7 +87,7 @@ class TransactionManager:
             try:
                 tx = dispatcher.process(tx_str)
                 return tx
-            except ValueError:
+            except NotMatchException:
                 # 不能通过该解析器解析
                 continue
         else:

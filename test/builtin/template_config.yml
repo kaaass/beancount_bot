@@ -1,0 +1,30 @@
+config:
+  accounts:
+    zfb: 'Assets:Digital:Alipay'
+    wx: 'Assets:Digital:Wechat'
+  default_account:
+    'Assets:Digital:Alipay'
+
+templates:
+  - command: ['饮料', '饮', '咖啡']
+    args:
+      - 'price'
+    template: |
+      {date} * "" "{command}"
+        {account}
+        Expenses:Food:Drink    {price} CNY
+
+  - command: '饭'
+    args:
+      - 'price'
+    computed:
+      hour: __import__('datetime').datetime.now().hour
+      expense: |
+          'Expenses:Food:Extra' if hour <= 3 or hour >= 21 else \
+          'Expenses:Food:Dinner:Breakfast' if hour <= 10 else \
+          'Expenses:Food:Dinner:Lunch' if hour <= 16 else \
+          'Expenses:Food:Dinner:Supper'
+    template: |
+      {date} * "" "饭"
+        {account}
+        {expense}  {price} CNY

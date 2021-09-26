@@ -1,7 +1,5 @@
 import unittest
 
-from beancount.parser import printer
-
 from beancount_bot import transaction
 from beancount_bot.dispatcher import Dispatcher
 
