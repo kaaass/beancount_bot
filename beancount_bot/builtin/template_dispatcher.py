@@ -5,6 +5,7 @@ from typing import List
 import yaml
 
 from beancount_bot.dispatcher import Dispatcher
+from beancount_bot.transaction import NotMatchException
 
 _CH_CLASS = [' ', '\"', '\\', '>']
 _STATE_MAT = [
@@ -51,6 +52,12 @@ def split_command(cmd):
     return words
 
 
+def _to_list(el):
+    if isinstance(el, list):
+        return el
+    return [el]
+
+
 class TemplateDispatcher(Dispatcher):
     """
     模板处理器。通过 Json 模板生成交易信息。
@@ -64,8 +71,7 @@ class TemplateDispatcher(Dispatcher):
 
     def quick_check(self, input_str: str) -> bool:
         words = split_command(input_str)
-        commands = map(lambda t: t['command'], self.templates)
-        prefixes = map(lambda e: e if isinstance(e, list) else [e], commands)
+        prefixes = map(lambda t: _to_list(t['command']), self.templates)
         prefixes = itertools.chain(*prefixes)
         # 开头相同且有空格隔开
         return any(map(lambda prefix: words[0] == prefix, prefixes))
@@ -74,7 +80,12 @@ class TemplateDispatcher(Dispatcher):
         words = split_command(input_str)
         cmd, args = words[0], words[1:]
         # 选择模板
-        template = next(filter(lambda t: cmd in t['command'], self.templates))
+        template = next(
+            filter(lambda t: cmd in _to_list(t['command']), self.templates),
+            None
+        )
+        if template is None:
+            raise NotMatchException()
         # 默认参数
         arg_map = {
             'account': self.config['default_account'],
@@ -90,9 +101,15 @@ class TemplateDispatcher(Dispatcher):
             arg_map['account'] = self.config['accounts'][account[0]]
         # 参数获取
         if 'args' in template:
-            arg_map.update({k: v for k, v in zip(template['args'], args)})
-            for empty_k in template['args'][len(args):]:
+            args_need = template['args']
+            if len(args) > len(args_need):
+                raise ValueError('解析错误！参数数量过多。')
+            arg_map.update({k: v for k, v in zip(args_need, args)})
+            for empty_k in args_need[len(args):]:
                 arg_map[empty_k] = ''
+        else:
+            if len(args) != 0:
+                raise ValueError('解析错误！命令不接受参数')
         # 计算待计算参数
         if 'computed' in template:
             for k, expr in template['computed'].items():

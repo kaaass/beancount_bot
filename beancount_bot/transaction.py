@@ -13,7 +13,7 @@ META_TIME = 'tgbot_time'
 Uuid = str
 
 
-class NotMatchException(BaseException):
+class NotMatchException(Exception):
     pass
 
 
