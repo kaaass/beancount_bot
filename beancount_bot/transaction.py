@@ -1,3 +1,4 @@
+import copy
 import datetime
 import uuid
 from typing import List, Tuple, Union
@@ -40,6 +41,7 @@ class TransactionManager:
             return tx_uuid, tx
         elif isinstance(tx, Transaction):
             # 添加控制元数据
+            tx = copy.deepcopy(tx)
             tx.meta[META_UUID] = tx_uuid
             tx.meta[META_TIME] = str(datetime.datetime.now())
             # 保存至账本
