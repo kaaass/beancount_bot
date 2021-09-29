@@ -15,14 +15,18 @@ templates:
   - command: [ '饮料', '饮', '咖啡' ]
     args:
       - 'price'
+    optional_args:
+      - 'seller'
     template: |
-      {date} * "" "{command}"
+      {date} * "{seller}" "{command}"
         {account}
         Expenses:Food:Drink    {price} CNY
 
   - command: '饭'
     args:
       - 'price'
+    optional_args:
+      - 'restaurant'
     computed:
       hour: __import__('datetime').datetime.now().hour
       expense: |
@@ -31,6 +35,6 @@ templates:
         'Expenses:Food:Dinner:Lunch' if hour <= 16 else \
         'Expenses:Food:Dinner:Supper'
     template: |
-      {date} * "" "饭"
+      {date} * "{restaurant}" "饭"
         {account}
         {expense}  {price} CNY

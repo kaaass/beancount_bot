@@ -1,9 +1,10 @@
 import datetime
 import itertools
-from typing import List
+from typing import List, Mapping
 
 import yaml
 
+from beancount_bot import logger
 from beancount_bot.dispatcher import Dispatcher
 from beancount_bot.transaction import NotMatchException
 
@@ -58,13 +59,38 @@ def _to_list(el):
     return [el]
 
 
+Template = Mapping
+
+
+def print_one_usage(template: Template) -> str:
+    """
+    打印一个模板的语法提示
+    :param template:
+    :return:
+    """
+    usage = ''
+    # 指令
+    command = template['command']
+    if isinstance(command, list):
+        usage += '|'.join(command)
+    else:
+        usage += command
+    # 参数
+    if 'args' in template:
+        usage += ' ' + ' '.join(template['args'])
+    # 可选参数
+    if 'optional_args' in template:
+        usage += ' ' + ' '.join(map(lambda s: f'[{s}]', template['optional_args']))
+    return usage
+
+
 class TemplateDispatcher(Dispatcher):
     """
     模板处理器。通过 Json 模板生成交易信息。
     """
 
-    def __init__(self, yml_config: str):
-        with open(yml_config, 'r', encoding='utf-8') as f:
+    def __init__(self, template_config: str):
+        with open(template_config, 'r', encoding='utf-8') as f:
             data = yaml.load(f)
         self.config = data['config']
         self.templates = data['templates']
@@ -102,20 +128,26 @@ class TemplateDispatcher(Dispatcher):
         # 参数获取
         if 'args' in template:
             args_need = template['args']
-            if len(args) > len(args_need):
-                raise ValueError('解析错误！参数数量过多。')
+            if len(args) < len(args_need):
+                raise ValueError('参数过少！语法：' + print_one_usage(template))
             arg_map.update({k: v for k, v in zip(args_need, args)})
-            for empty_k in args_need[len(args):]:
+            args = args[len(args_need):]
+        if 'optional_args' in template:
+            optional_args = template['optional_args']
+            if len(args) > len(optional_args):
+                raise ValueError('参数过多！语法：' + print_one_usage(template))
+            arg_map.update({k: v for k, v in zip(optional_args, args)})
+            for empty_k in optional_args[len(args):]:
                 arg_map[empty_k] = ''
-        else:
-            if len(args) != 0:
-                raise ValueError('解析错误！命令不接受参数')
+            args = args[len(optional_args):]
+        if len(args) != 0:
+            raise ValueError('参数过多！语法：' + print_one_usage(template))
         # 计算待计算参数
         if 'computed' in template:
             for k, expr in template['computed'].items():
                 arg_map[k] = eval(expr, None, arg_map)
-        print(arg_map)
         # 进行模板替换
+        logger.debug('模板参数 %s', arg_map)
         ret = template['template']
         for k, v in arg_map.items():
             ret = ret.replace(f'{{{k}}}', str(v))

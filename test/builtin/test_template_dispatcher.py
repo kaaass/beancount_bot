@@ -81,8 +81,10 @@ class TestTemplateDispatcher(unittest.TestCase):
         exception_cases = [
             ('vul', NotMatchException),
             ('vultrr', NotMatchException),
-            ('vultr 123', '命令不接受参数'),
-            ('饮 123 456', '参数数量过多'),
+            ('vultr 123', '参数过多'),
+            ('饮 123 456 789', '参数过多'),
+            ('饮', '参数过少'),
+            ('vultr > wx zfb', '不支持多目标账户'),
         ]
 
         d = TemplateDispatcher(os.path.join(PATH, 'template_config.yml'))
@@ -106,8 +108,8 @@ class TestTemplateDispatcher(unittest.TestCase):
         hour = datetime.datetime.now().hour
         expense = 'Expenses:Food:Extra' if hour <= 3 or hour >= 21 else \
             'Expenses:Food:Dinner:Breakfast' if hour <= 10 else \
-            'Expenses:Food:Dinner:Lunch' if hour <= 16 else \
-            'Expenses:Food:Dinner:Supper'
+                'Expenses:Food:Dinner:Lunch' if hour <= 16 else \
+                    'Expenses:Food:Dinner:Supper'
 
         d = TemplateDispatcher(os.path.join(PATH, 'template_config.yml'))
 
@@ -120,4 +122,10 @@ class TestTemplateDispatcher(unittest.TestCase):
         ret = transaction.stringfy(ret)
         self.assertIn(expense, ret)
         self.assertIn('Assets:Digital:Wechat', ret)
+        print(ret)
+
+        ret = d.process('饭 20 KFC')
+        ret = transaction.stringfy(ret)
+        self.assertIn(expense, ret)
+        self.assertIn('"KFC" "饭"', ret)
         print(ret)
