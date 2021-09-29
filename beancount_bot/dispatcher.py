@@ -1,3 +1,5 @@
+from typing import Union
+
 from beancount.core.data import Transaction
 from beancount.parser import parser
 
@@ -15,15 +17,21 @@ class Dispatcher:
         """
         return True
 
-    def process(self, input_str: str) -> Transaction:
+    def process(self, input_str: str) -> Union[Transaction, str]:
         """
         解析输入为交易。若输入不合规，则抛出 ValueError
         :param input_str:
         :return:
         """
         tx_str = self._process_raw(input_str)
-        tx = parser.parse_one(tx_str)
-        return tx
+        try:
+            tx = parser.parse_one(tx_str)
+            if isinstance(tx, Transaction):
+                return tx
+            else:
+                return tx_str
+        except AssertionError:
+            return tx_str
 
     def _process_raw(self, input_str: str) -> str:
         """

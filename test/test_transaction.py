@@ -34,6 +34,19 @@ class TestTransactionManager(unittest.TestCase):
         self.assertTrue('Income:Unknown\n' in tx_str)
         self.assertTrue('Assets:Unknown  1 CNY\n' in tx_str)
 
+    def test_create_raw(self):
+        # Mock
+        class MockDispatcher(Dispatcher):
+            def _process_raw(self, input_str: str) -> str:
+                return '; comment'
+
+        # 测试
+        manager = TransactionManager([MockDispatcher()], self.tmp_file)
+        tx_uuid, tx = manager.create_from_str('')
+        self.assertEqual(tx, '; comment')
+        with open(self.tmp_file, 'r', encoding='utf-8') as f:
+            self.assertIn(tx_uuid, f.read())
+
     def test_remove(self):
         # Mock
         poison_str = str(uuid.uuid4())
@@ -47,11 +60,45 @@ class TestTransactionManager(unittest.TestCase):
                 '''
 
         manager = TransactionManager([MockDispatcher()], self.tmp_file)
+        with open(self.tmp_file, 'a+', encoding='utf-8') as f:
+            pre = str(uuid.uuid4())
+            f.write(f'; {pre}\n')
         tx_uuid, tx = manager.create_from_str('')
+        with open(self.tmp_file, 'a+', encoding='utf-8') as f:
+            post = str(uuid.uuid4())
+            f.write(f'; {post}\n')
         # 删除
         delete_tx = manager.remove(tx_uuid)
         self.assertEqual(tx.meta[transaction.META_UUID], delete_tx.meta[transaction.META_UUID])
 
         with open(self.tmp_file, 'r', encoding='utf-8') as f:
             data = f.read()
-        self.assertFalse(poison_str in data)
+        self.assertNotIn(poison_str, data)
+        self.assertIn(pre, data)
+        self.assertIn(post, data)
+
+    def test_remove_raw(self):
+        # Mock
+        class MockDispatcher(Dispatcher):
+            def _process_raw(self, input_str: str) -> str:
+                return '; comment1\n; comment2'
+
+        manager = TransactionManager([MockDispatcher()], self.tmp_file)
+        with open(self.tmp_file, 'a+', encoding='utf-8') as f:
+            pre = str(uuid.uuid4())
+            f.write(f'; {pre}\n')
+        tx_uuid, tx = manager.create_from_str('')
+        with open(self.tmp_file, 'a+', encoding='utf-8') as f:
+            post = str(uuid.uuid4())
+            f.write(f'; {post}\n')
+        # 删除
+        delete_tx = manager.remove(tx_uuid)
+        self.assertEqual(tx, delete_tx)
+
+        with open(self.tmp_file, 'r', encoding='utf-8') as f:
+            data = f.read()
+        self.assertNotIn('comment1', data)
+        self.assertNotIn('comment2', data)
+        self.assertNotIn(tx_uuid, data)
+        self.assertIn(pre, data)
+        self.assertIn(post, data)
