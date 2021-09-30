@@ -1,6 +1,7 @@
 import copy
 import datetime
 import importlib
+import os
 import time
 import uuid
 from typing import List, Tuple, Union
@@ -39,7 +40,7 @@ class TransactionManager:
         tx_uuid = Uuid(uuid.uuid4())
         if isinstance(tx, str):
             # 保存至账本
-            with open(self.__bean_file, 'a+', encoding='utf-8') as f:
+            with open(self.bean_file, 'a+', encoding='utf-8') as f:
                 f.write(f"; TGBOT_START {tx_uuid}\n{tx}\n; TGBOT_END {tx_uuid}\n")
             return tx_uuid, tx
         elif isinstance(tx, Transaction):
@@ -48,7 +49,7 @@ class TransactionManager:
             tx.meta[META_UUID] = tx_uuid
             tx.meta[META_TIME] = str(datetime.datetime.now())
             # 保存至账本
-            with open(self.__bean_file, 'a+', encoding='utf-8') as f:
+            with open(self.bean_file, 'a+', encoding='utf-8') as f:
                 printer.print_entry(tx, file=f)
             return tx_uuid, tx
         else:
@@ -60,7 +61,7 @@ class TransactionManager:
         :param tx_uuid:
         :return:
         """
-        entries, errors, _ = parser.parse_file(self.__bean_file)
+        entries, errors, _ = parser.parse_file(self.bean_file)
         if len(errors) > 0:
             desc = '\n'.join(map(lambda err: f'行 {err.source["lineno"]}：{err.message}', errors))
             raise ValueError("账本文件内容错误！\n" + desc)
@@ -78,9 +79,9 @@ class TransactionManager:
         for posting in to_delete.postings:
             max_line = max(max_line, posting.meta['lineno'])
         # 删除
-        with open(self.__bean_file, 'r', encoding='utf-8') as f:
+        with open(self.bean_file, 'r', encoding='utf-8') as f:
             lines = f.readlines()
-        with open(self.__bean_file, 'w', encoding='utf-8') as f:
+        with open(self.bean_file, 'w', encoding='utf-8') as f:
             f.write(''.join(lines[:min_line - 1] + lines[max_line:]))
         return to_delete
 
@@ -90,7 +91,7 @@ class TransactionManager:
         :param tx_uuid:
         :return:
         """
-        with open(self.__bean_file, 'r', encoding='utf-8') as f:
+        with open(self.bean_file, 'r', encoding='utf-8') as f:
             lines = f.readlines()
         # 筛选列
         min_line = -1
@@ -106,7 +107,7 @@ class TransactionManager:
         if min_line == -1 or max_line == -1:
             raise ValueError("交易不存在！")
         # 删除
-        with open(self.__bean_file, 'w', encoding='utf-8') as f:
+        with open(self.bean_file, 'w', encoding='utf-8') as f:
             f.write(''.join(lines[:min_line] + lines[max_line + 1:]))
         return ''.join(lines[min_line + 1:max_line])[:-1]
 
@@ -135,6 +136,21 @@ class TransactionManager:
             # 没有匹配
             raise ValueError("无法识别此交易语法")
 
+    @property
+    def bean_file(self) -> str:
+        params = {
+            'year': time.strftime("%Y", time.localtime()),
+            'month': time.strftime("%m", time.localtime()),
+            'date': time.strftime("%d", time.localtime()),
+        }
+        bean_file = self.__bean_file
+        for k, v in params.items():
+            bean_file = bean_file.replace(f'{{{k}}}', v)
+        # 创建父文件夹
+        path = os.path.dirname(os.path.realpath(bean_file))
+        os.makedirs(path, exist_ok=True)
+        return bean_file
+
 
 def stringfy(tx: Union[Transaction, str]) -> str:
     """
@@ -162,14 +178,7 @@ def get_manager() -> TransactionManager:
             clazz = getattr(importlib.import_module(module), classname)
             dispatchers.append(clazz(**conf['args']))
         # 获得 Bean 文件位置
-        params = {
-            'year': time.strftime("%Y", time.localtime()),
-            'month': time.strftime("%m", time.localtime()),
-            'date': time.strftime("%d", time.localtime()),
-        }
         bean_file: str = get_config('transaction.beancount_file')
-        for k, v in params.items():
-            bean_file = bean_file.replace(f'{{{k}}}', v)
         # 创建对象
         return TransactionManager(dispatchers, bean_file)
 
