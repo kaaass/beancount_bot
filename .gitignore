@@ -13,3 +13,8 @@ tmp/
 venv
 */.pytest_cache
 tmp.bean
+template.yml
+plugins
+costflow.json
+beancount_bot.yml
+bot.session
