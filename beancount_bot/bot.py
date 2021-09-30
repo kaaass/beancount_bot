@@ -2,10 +2,11 @@ import telebot
 from telebot import apihelper
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton, MessageEntity, Message, CallbackQuery
 
-from beancount_bot import transaction, logger
+from beancount_bot import transaction
 from beancount_bot.config import get_config, load_config
 from beancount_bot.session import get_session, SESS_AUTH, get_session_for, set_session
 from beancount_bot.transaction import get_manager
+from beancount_bot.util import logger
 
 apihelper.ENABLE_MIDDLEWARE = True
 

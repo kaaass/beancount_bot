@@ -3,8 +3,8 @@ import itertools
 from typing import List, Mapping
 
 import yaml
+from beancount_bot.util import logger
 
-from beancount_bot import logger
 from beancount_bot.dispatcher import Dispatcher
 from beancount_bot.transaction import NotMatchException
 

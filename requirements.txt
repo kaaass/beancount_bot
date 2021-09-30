@@ -1,0 +1,4 @@
+beancount==2.3.4
+click==8.0.1
+pyTelegramBotAPI==4.1.0
+PyYAML==5.4.1

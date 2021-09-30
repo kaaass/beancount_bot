@@ -1,8 +1,9 @@
 import click
 
-from beancount_bot import bot, logger, config as conf
+from beancount_bot import bot, config as conf
 from beancount_bot.config import load_config, get_config
 from beancount_bot.session import load_session
+from beancount_bot.util import logger
 
 
 @click.command()

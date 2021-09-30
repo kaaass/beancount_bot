@@ -18,3 +18,4 @@ plugins
 costflow.json
 beancount_bot.yml
 bot.session
+*.egg-info/

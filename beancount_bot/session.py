@@ -2,7 +2,7 @@ import json
 import os.path
 from types import MappingProxyType
 
-from beancount_bot import logger
+from beancount_bot.util import logger
 from beancount_bot.config import get_config
 
 SESS_AUTH = 'auth'
