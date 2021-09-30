@@ -4,6 +4,9 @@ from beancount_bot import __VERSION__
 with open("requirements.txt", "r") as f:
     install_requires = f.read().splitlines()
 
+with open("README.md", "r", encoding='utf-8') as f:
+    long_description = f.read()
+
 setup(
     name='beancount-bot',
     version=__VERSION__,
@@ -18,5 +21,7 @@ setup(
     license='MIT',
     author='KAAAsS',
     author_email='admin@kaaass.net',
-    description='A telegram bot designed for Beancount'
+    description='A telegram bot designed for Beancount',
+    long_description=long_description,
+    long_description_content_type="text/markdown"
 )
