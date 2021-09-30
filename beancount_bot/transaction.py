@@ -1,11 +1,14 @@
 import copy
 import datetime
+import importlib
+import time
 import uuid
 from typing import List, Tuple, Union
 
 from beancount.core.data import Transaction
 from beancount.parser import printer, parser
 
+from beancount_bot.config import get_global, GLOBAL_MANAGER, get_config
 from beancount_bot.dispatcher import Dispatcher
 
 META_UUID = 'tgbot_uuid'
@@ -142,3 +145,32 @@ def stringfy(tx: Union[Transaction, str]) -> str:
     if isinstance(tx, str):
         return tx
     return printer.format_entry(tx)
+
+
+def get_manager() -> TransactionManager:
+    """
+    从配置创建管理对象
+    :return:
+    """
+
+    def create_manager():
+        # 创建分发器
+        dispatchers = []
+        for conf in get_config('transaction.message_dispatcher', []):
+            class_path = conf['class'].split('.')
+            module, classname = '.'.join(class_path[:-1]), class_path[-1]
+            clazz = getattr(importlib.import_module(module), classname)
+            dispatchers.append(clazz(**conf['args']))
+        # 获得 Bean 文件位置
+        params = {
+            'year': time.strftime("%Y", time.localtime()),
+            'month': time.strftime("%m", time.localtime()),
+            'date': time.strftime("%d", time.localtime()),
+        }
+        bean_file: str = get_config('transaction.beancount_file')
+        for k, v in params.items():
+            bean_file = bean_file.replace(f'{{{k}}}', v)
+        # 创建对象
+        return TransactionManager(dispatchers, bean_file)
+
+    return get_global(GLOBAL_MANAGER, create_manager)
