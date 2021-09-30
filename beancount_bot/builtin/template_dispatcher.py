@@ -72,7 +72,7 @@ def print_one_usage(template: Template) -> str:
     # 指令
     command = template['command']
     if isinstance(command, list):
-        usage += '|'.join(command)
+        usage += '(' + '|'.join(command) + ')'
     else:
         usage += command
     # 参数
@@ -88,6 +88,28 @@ class TemplateDispatcher(Dispatcher):
     """
     模板处理器。通过 Json 模板生成交易信息。
     """
+
+    def get_name(self) -> str:
+        return '模板'
+
+    def get_usage(self) -> str:
+        if len(self.templates) > 0:
+            command_usage = '\n'.join([f'  - {print_one_usage(t)}' for t in self.templates])
+        else:
+            command_usage = '没有定义任何模板'
+
+        default_account = self.config['default_account']
+
+        if len(self.config['accounts']) > 0:
+            account_alias = '\n'.join([f'  {k} - {v}' for k, v in self.config['accounts'].items()])
+        else:
+            account_alias = '没有定义账户'
+
+        return '模板指令格式：指令名 必填参数 [可选参数] > 目标账户\n' \
+               '  1. 指令名可以有多个，记为”(指令名1|指令名2|...)“；\n' \
+               '  2. 目标账户可以省略。省略将使用默认账户\n\n' \
+               f'当前定义的模板：\n{command_usage}\n\n' \
+               f'默认账户：{default_account}\n支持的账户：\n{account_alias}'
 
     def __init__(self, template_config: str):
         with open(template_config, 'r', encoding='utf-8') as f:

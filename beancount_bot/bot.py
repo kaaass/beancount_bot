@@ -74,6 +74,11 @@ def auth_token_handler(message: Message):
 
 @bot.message_handler(commands=['reload'])
 def reload_handler(message):
+    """
+    重载配置指令
+    :param message:
+    :return:
+    """
     if not check_auth():
         bot.reply_to(message, "请先进行鉴权！")
         return
@@ -82,12 +87,38 @@ def reload_handler(message):
 
 
 @bot.message_handler(commands=['help'])
-def send_welcome(message):
-    if not check_auth():
-        bot.reply_to(message, "请先进行鉴权！")
-        return
-    # TODO
-    bot.reply_to(message, "Howdy, how are you doing?")
+def help_handler(message):
+    """
+    帮助指令
+    :param message:
+    :return:
+    """
+    # 创建消息按键
+    markup = InlineKeyboardMarkup()
+    dispatchers = get_manager().dispatchers
+    for ind, d in zip(range(len(dispatchers)), dispatchers):
+        markup.add(InlineKeyboardButton(f'帮助：{d.get_name()}', callback_data=f'help:{ind}'))
+    # 帮助信息
+    command_usage = [
+        '/start - 鉴权',
+        '/help - 使用帮助',
+        '/reload - 重新加载配置文件',
+    ]
+    bot.reply_to(message, "记账 Bot\n\n可用指令列表：\n"
+                 + '\n'.join(command_usage)
+                 + "\n\n交易语句帮助请选择对应模块。", reply_markup=markup)
+
+
+@bot.callback_query_handler(func=lambda call: call.data[:4] == 'help')
+def callback_help(call: CallbackQuery):
+    try:
+        d_id = int(call.data[5:])
+        dispatchers = get_manager().dispatchers
+        d = dispatchers[d_id]
+        bot.reply_to(call.message, f'帮助：{d.get_name()}\n\n' + d.get_usage())
+    except Exception as e:
+        logger.error(f'{call.id}：发生未知错误！', e)
+        bot.answer_callback_query(call.id, '发生未知错误！')
 
 
 #######
@@ -97,6 +128,11 @@ def send_welcome(message):
 
 @bot.message_handler(func=lambda m: True)
 def transaction_query_handler(message: Message):
+    """
+    交易语句处理
+    :param message:
+    :return:
+    """
     if not check_auth():
         auth_token_handler(message)
         return
@@ -110,7 +146,7 @@ def transaction_query_handler(message: Message):
         # 回复
         bot.reply_to(message, transaction.stringfy(tx), reply_markup=markup)
     except ValueError as e:
-        logger.info(f'{message.from_user.id}：无法创建交易', e)
+        logger.info(f'{message.from_user.id}：无法撤回交易', e)
         bot.reply_to(message, e.args[0])
     except Exception as e:
         logger.error(f'{message.from_user.id}：发生未知错误！添加交易失败。', e)

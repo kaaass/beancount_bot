@@ -44,3 +44,17 @@ class Dispatcher:
                  Assets:Unknown
                  Expenses:Unknown    + 1 CNY
                '''
+
+    def get_name(self) -> str:
+        """
+        获得处理器名称。用于在 /help 中显示
+        :return:
+        """
+        return '未知'
+
+    def get_usage(self) -> str:
+        """
+        获得帮助信息
+        :return:
+        """
+        return '暂无帮助信息。'
