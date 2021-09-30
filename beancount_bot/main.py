@@ -1,4 +1,5 @@
 import click
+from beancount_bot.transaction import get_manager
 
 from beancount_bot import bot, config as conf
 from beancount_bot.config import load_config, get_config
@@ -22,6 +23,9 @@ def main(config):
     # 加载会话
     logger.info("加载会话...")
     load_session()
+    # 创建管理对象
+    logger.info("创建管理对象...")
+    get_manager()
     # 启动
     logger.info("启动 Bot...")
     bot.serving()

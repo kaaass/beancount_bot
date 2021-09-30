@@ -1,7 +1,7 @@
 import copy
 import datetime
-import importlib
 import os
+import sys
 import time
 import uuid
 from typing import List, Tuple, Union
@@ -175,7 +175,8 @@ def get_manager() -> TransactionManager:
         for conf in get_config('transaction.message_dispatcher', []):
             class_path = conf['class'].split('.')
             module, classname = '.'.join(class_path[:-1]), class_path[-1]
-            clazz = getattr(importlib.import_module(module), classname)
+            __import__(module)
+            clazz = getattr(sys.modules[module], classname)
             dispatchers.append(clazz(**conf['args']))
         # 获得 Bean 文件位置
         bean_file: str = get_config('transaction.beancount_file')
