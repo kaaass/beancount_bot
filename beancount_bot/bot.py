@@ -160,4 +160,4 @@ def serving():
     if (proxy := get_config('bot.proxy')) is not None:
         apihelper.proxy = {'https': proxy}
     # 启动
-    bot.polling()
+    bot.infinity_polling()

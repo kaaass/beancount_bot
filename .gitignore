@@ -12,7 +12,7 @@ tmp/
 .eggs
 venv
 */.pytest_cache
-tmp.bean
+*.bean
 template.yml
 plugins
 costflow.json
