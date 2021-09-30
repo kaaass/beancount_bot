@@ -3,10 +3,22 @@ from telebot import apihelper
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton, MessageEntity, Message
 
 from beancount_bot import transaction, logger
-from beancount_bot.config import get_config
+from beancount_bot.config import get_config, load_config
 from beancount_bot.transaction import get_manager
 
 bot = telebot.TeleBot(token=None, parse_mode=None)
+
+
+@bot.message_handler(commands=['reload'])
+def reload_handler(message):
+    load_config()
+    bot.reply_to(message, "成功重载配置！")
+
+
+@bot.message_handler(commands=['start', 'help'])
+def send_welcome(message):
+    # TODO
+    bot.reply_to(message, "Howdy, how are you doing?")
 
 
 @bot.message_handler(func=lambda m: True)
@@ -51,12 +63,6 @@ def callback_withdraw(call):
     except Exception as e:
         logger.error(f'{call.id}：发生未知错误！撤回交易失败。', e)
         bot.answer_callback_query(call.id, '发生未知错误！撤回交易失败。')
-
-
-@bot.message_handler(commands=['start', 'help'])
-def send_welcome(message):
-    # TODO
-    bot.reply_to(message, "Howdy, how are you doing?")
 
 
 def serving():

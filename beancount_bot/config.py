@@ -5,6 +5,8 @@ global_object_map = {}
 GLOBAL_CONFIG = 'config'
 GLOBAL_MANAGER = 'manager'
 
+config_file = ''
+
 
 def set_global(key: str, obj):
     """
@@ -30,12 +32,14 @@ def get_global(key: str, default_producer: callable):
     return global_object_map[key]
 
 
-def load_config(path):
+def load_config(path=None):
     """
     从文件加载配置，将清空全局对象
     :param path:
     :return:
     """
+    if path is None:
+        path = config_file
     global global_object_map
     with open(path, 'r', encoding='utf-8') as f:
         data = yaml.load(f)
