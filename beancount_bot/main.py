@@ -1,12 +1,20 @@
-from beancount_bot import bot, logger, config
+import click
+
+from beancount_bot import bot, logger, config as conf
 from beancount_bot.config import load_config, get_config
 from beancount_bot.session import load_session
 
-if __name__ == '__main__':
+
+@click.command()
+@click.option('-c', '--config', default='beancount_bot.yml', help='配置文件路径')
+def main(config):
+    """
+    适用于 Beancount 的 Telegram 机器人
+    """
     logger.setLevel('INFO')
     # 加载配置
-    logger.info("加载配置...")
-    config.config_file = 'beancount_bot.yml'
+    logger.info("加载配置：%s", config)
+    conf.config_file = config
     load_config()
     # 设置日志等级
     logger.setLevel(get_config('log.level', 'INFO'))
@@ -16,3 +24,7 @@ if __name__ == '__main__':
     # 启动
     logger.info("启动 Bot...")
     bot.serving()
+
+
+if __name__ == '__main__':
+    main()
