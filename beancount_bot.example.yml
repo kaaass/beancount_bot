@@ -1,0 +1,29 @@
+log:
+  # 日志等级
+  level: 'INFO'
+
+bot:
+  # 代理
+  proxy: 'http://127.0.0.1:8080'
+
+  # Telegram 机器人 Token
+  token: ''
+
+  # 鉴权用令牌。第一次进入机器人时用于校验身份
+  auth_token: '123456'
+
+  # 机器人会话文件路径
+  session_file: 'bot.session'
+
+transaction:
+  # 账本文件。可以使用：{year}、{month}、{date}
+  beancount_file: '{year}-{month}.bean'
+
+  # 消息处理器
+  message_dispatcher:
+    # class 必须包含完整模块名，第三方插件可以设置 PYTHONPATH 载入
+    # args 参考每个处理器各自的文档
+    # 目前内建了模板处理器，配置如下即可
+    - class: 'beancount_bot.builtin.template_dispatcher.TemplateDispatcher'
+      args:
+        template_config: 'template.yml'
