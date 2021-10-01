@@ -1,13 +1,14 @@
-import sys
 import threading
 import time
-from typing import List, Dict
+from typing import Dict
 
 import schedule
 from telebot import TeleBot
 
 from beancount_bot.config import get_config, get_global, GLOBAL_TASK
 from beancount_bot.util import logger, load_class
+
+_schedule_thread: threading.Thread = None
 
 
 class ScheduleTask:
@@ -65,22 +66,22 @@ def get_task() -> Dict[str, ScheduleTask]:
     return get_global(GLOBAL_TASK, load_task)
 
 
-def schedule_continuous_run(interval=5):
+def start_schedule_thread(interval=5) -> threading.Thread:
     """
     运行定时任务
     :param interval:
     :return:
     """
-    cease_continuous_run = threading.Event()
 
     class ScheduleThread(threading.Thread):
         @classmethod
         def run(cls):
-            while not cease_continuous_run.is_set():
+            while True:
                 schedule.run_pending()
                 time.sleep(interval)
-            sys.exit(0)
 
-    continuous_thread = ScheduleThread()
-    continuous_thread.start()
-    return cease_continuous_run
+    global _schedule_thread
+    _schedule_thread = ScheduleThread()
+    _schedule_thread.setDaemon(True)
+    _schedule_thread.start()
+    return _schedule_thread
