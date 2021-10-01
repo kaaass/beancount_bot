@@ -1,4 +1,5 @@
 from setuptools import setup
+
 from beancount_bot import __VERSION__
 
 with open("requirements.txt", "r") as f:
@@ -23,5 +24,10 @@ setup(
     author_email='admin@kaaass.net',
     description='A telegram bot designed for Beancount',
     long_description=long_description,
-    long_description_content_type="text/markdown"
+    long_description_content_type="text/markdown",
+    classifiers=[
+        "Programming Language :: Python :: 3",
+        "License :: OSI Approved :: MIT License",
+        "Operating System :: OS Independent",
+    ]
 )

@@ -6,4 +6,4 @@ from beancount_bot import util
 
 __AUTHOR__ = 'KAAAsS'
 __LICENSE__ = "MIT"
-__VERSION__ = "1.0.0"
+__VERSION__ = "1.0.1"
