@@ -4,6 +4,7 @@ global_object_map = {}
 
 GLOBAL_CONFIG = 'config'
 GLOBAL_MANAGER = 'manager'
+GLOBAL_TASK = 'task'
 
 config_file = ''
 

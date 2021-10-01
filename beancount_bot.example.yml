@@ -27,3 +27,21 @@ transaction:
     - class: 'beancount_bot.builtin.template_dispatcher.TemplateDispatcher'
       args:
         template_config: 'template.yml'
+
+schedule:
+  # 定时任务定义
+  # name：定时任务名，可以用 /task name 主动触发
+  # class：定时任务类
+  # args：创建任务需要的参数
+
+  # 定时任务示例：定时更新价格
+  # 使用内建任务类：beancount_bot.builtin.DailyCommandTask
+  # 该类在每日 time 时执行指令，之后广播 message 消息
+  - name: price
+    class: 'beancount_bot.builtin.DailyCommandTask'
+    args:
+      time: '21:30'
+      message: '当日价格更新完成'
+      commands:
+        - 'bean-price /bean/main.bean >> /bean/automatic/prices.bean'
+

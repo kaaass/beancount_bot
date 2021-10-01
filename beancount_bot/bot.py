@@ -5,6 +5,7 @@ from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton, MessageEnt
 from beancount_bot import transaction
 from beancount_bot.config import get_config, load_config
 from beancount_bot.session import get_session, SESS_AUTH, get_session_for, set_session
+from beancount_bot.task import load_task, get_task
 from beancount_bot.transaction import get_manager
 from beancount_bot.util import logger
 
@@ -84,6 +85,7 @@ def reload_handler(message):
         bot.reply_to(message, "请先进行鉴权！")
         return
     load_config()
+    load_task()
     bot.reply_to(message, "成功重载配置！")
 
 
@@ -104,6 +106,7 @@ def help_handler(message):
         '/start - 鉴权',
         '/help - 使用帮助',
         '/reload - 重新加载配置文件',
+        '/task - 查看、运行任务',
     ]
     bot.reply_to(message, "记账 Bot\n\n可用指令列表：\n"
                  + '\n'.join(command_usage)
@@ -120,6 +123,29 @@ def callback_help(call: CallbackQuery):
     except Exception as e:
         logger.error(f'{call.id}：发生未知错误！', e)
         bot.answer_callback_query(call.id, '发生未知错误！')
+
+
+@bot.message_handler(commands=['task'])
+def task_handler(message):
+    """
+    任务指令
+    :param message:
+    :return:
+    """
+    if not check_auth():
+        bot.reply_to(message, "请先进行鉴权！")
+        return
+
+    cmd = message.text
+    tasks = get_task()
+    if cmd == '/task':
+        # 显示所有任务
+        bot.reply_to(message, '当前注册任务：' + ', '.join(tasks.keys()))
+    else:
+        # 运行任务
+        dest = cmd[6:]
+        task = tasks[dest]
+        task.trigger(bot)
 
 
 #######

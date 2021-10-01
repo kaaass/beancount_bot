@@ -1,4 +1,6 @@
 import click
+
+from beancount_bot.task import load_task, schedule_continuous_run
 from beancount_bot.transaction import get_manager
 
 from beancount_bot import bot, config as conf
@@ -26,6 +28,10 @@ def main(config):
     # 创建管理对象
     logger.info("创建管理对象...")
     get_manager()
+    # 加载定时任务
+    logger.info("加载定时任务...")
+    load_task()
+    schedule_continuous_run()
     # 启动
     logger.info("启动 Bot...")
     bot.serving()

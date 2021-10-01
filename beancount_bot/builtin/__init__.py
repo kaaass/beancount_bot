@@ -1,2 +1,3 @@
 from beancount_bot.builtin import template_dispatcher
+from beancount_bot.builtin.daily_command_task import DailyCommandTask
 from beancount_bot.builtin.template_dispatcher import TemplateDispatcher

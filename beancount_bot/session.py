@@ -1,13 +1,14 @@
 import json
 import os.path
 from types import MappingProxyType
+from typing import Dict, Iterable
 
-from beancount_bot.util import logger
 from beancount_bot.config import get_config
+from beancount_bot.util import logger
 
 SESS_AUTH = 'auth'
 
-_session_cache = {}
+_session_cache: Dict[str, dict] = {}
 
 
 def load_session():
@@ -67,3 +68,15 @@ def set_session(uid: int, key: str, value: object):
     session_file = get_config('bot.session_file')
     with open(session_file, 'w', encoding='utf-8') as f:
         json.dump(_session_cache, f)
+
+
+def all_user(auth=True) -> Iterable[int]:
+    """
+    获得所有用户
+    :param auth:
+    :return:
+    """
+    if auth:
+        return map(lambda t: int(t[0]), filter(lambda t: SESS_AUTH in t[1] and t[1][SESS_AUTH], _session_cache.items()))
+    else:
+        return map(int, _session_cache.keys())

@@ -1,7 +1,6 @@
 import copy
 import datetime
 import os
-import sys
 import time
 import uuid
 from typing import List, Tuple, Union
@@ -11,6 +10,7 @@ from beancount.parser import printer, parser
 
 from beancount_bot.config import get_global, GLOBAL_MANAGER, get_config
 from beancount_bot.dispatcher import Dispatcher
+from beancount_bot.util import load_class
 
 META_UUID = 'tgbot_uuid'
 META_TIME = 'tgbot_time'
@@ -173,10 +173,7 @@ def get_manager() -> TransactionManager:
         # 创建分发器
         dispatchers = []
         for conf in get_config('transaction.message_dispatcher', []):
-            class_path = conf['class'].split('.')
-            module, classname = '.'.join(class_path[:-1]), class_path[-1]
-            __import__(module)
-            clazz = getattr(sys.modules[module], classname)
+            clazz = load_class(conf['class'])
             dispatchers.append(clazz(**conf['args']))
         # 获得 Bean 文件位置
         bean_file: str = get_config('transaction.beancount_file')
