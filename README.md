@@ -27,7 +27,7 @@ pip install beancount_bot
 
 ## 推荐插件
 
-1. [kaaass/beancount_bot_costflow](https://github.com/kaaass/beancount_bot_costflow)
+1. [kaaass/beancount_bot_costflow](https://github.com/kaaass/beancount_bot_costflow)：支持 Costflow 语法
 
 欢迎在 Issue 推荐优秀插件。
 
