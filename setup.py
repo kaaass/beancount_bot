@@ -19,6 +19,7 @@ setup(
         ]
     },
     install_requires=install_requires,
+    python_requires='>=3.6.0',
     license='MIT',
     author='KAAAsS',
     author_email='admin@kaaass.net',

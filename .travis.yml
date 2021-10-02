@@ -1,6 +1,5 @@
 language: python
 python:
-  - "3.5"
   - "3.6"
   - "3.7"
   - "3.8"
@@ -8,4 +7,4 @@ python:
 install:
   - pip install -r requirements.txt
 script:
-  - py.test -s ./test/
+  - py.test -vv -s ./test/
