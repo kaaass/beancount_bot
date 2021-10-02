@@ -5,6 +5,7 @@
 ![GitHub](https://img.shields.io/github/license/kaaass/beancount_bot)
 ![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/kaaass/beancount_bot?color=green&label=version)
 ![PyPI](https://img.shields.io/pypi/v/beancount_bot)
+[![Build Status](https://app.travis-ci.com/kaaass/beancount_bot.svg?branch=master)](https://app.travis-ci.com/kaaass/beancount_bot)
 
 ## Features
 
