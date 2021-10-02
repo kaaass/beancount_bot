@@ -43,7 +43,7 @@ def load_config(path=None):
         path = config_file
     global global_object_map
     with open(path, 'r', encoding='utf-8') as f:
-        data = yaml.load(f)
+        data = yaml.full_load(f)
     global_object_map = {}
     set_global(GLOBAL_CONFIG, data)
 

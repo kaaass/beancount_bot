@@ -113,7 +113,7 @@ class TemplateDispatcher(Dispatcher):
 
     def __init__(self, template_config: str):
         with open(template_config, 'r', encoding='utf-8') as f:
-            data = yaml.load(f)
+            data = yaml.full_load(f)
         self.config = data['config']
         self.templates = data['templates']
 
