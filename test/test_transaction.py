@@ -10,7 +10,7 @@ from beancount_bot.transaction import TransactionManager
 class TestTransactionManager(unittest.TestCase):
 
     def setUp(self):
-        with tempfile.TemporaryFile('w+b', suffix='.bean') as f:
+        with tempfile.NamedTemporaryFile('w+b', suffix='.bean', delete=False) as f:
             self.tmp_file = f.name
 
     def test_create(self):
