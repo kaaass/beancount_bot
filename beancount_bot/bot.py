@@ -173,7 +173,7 @@ def transaction_query_handler(message: Message):
         # 回复
         bot.reply_to(message, transaction.stringfy(tx), reply_markup=markup)
     except ValueError as e:
-        logger.info(f'{message.from_user.id}：无法撤回交易', e)
+        logger.info(f'{message.from_user.id}：无法添加交易', e)
         bot.reply_to(message, e.args[0])
     except Exception as e:
         logger.error(f'{message.from_user.id}：发生未知错误！添加交易失败。', e)
