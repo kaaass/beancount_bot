@@ -220,7 +220,8 @@ def serving():
     token = get_config('bot.token')
     bot.token = token
     # 设置代理
-    if (proxy := get_config('bot.proxy')) is not None:
+    proxy = get_config('bot.proxy')
+    if proxy is not None:
         apihelper.proxy = {'https': proxy}
     # 启动
     bot.infinity_polling()
