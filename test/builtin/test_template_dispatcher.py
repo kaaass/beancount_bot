@@ -24,19 +24,19 @@ class TestTemplateDispatcher(unittest.TestCase):
             ('饮料 20', ['饮料', '20']),
             ('饮料20', ['饮料20']),
             ('"饮料""20"', ['饮料', '20']),
-            ('饮料 666>21', ['饮料', '666', '>', '21']),
-            ('饮料 20> 521', ['饮料', '20', '>', '521']),
-            ('饮料 0 >21', ['饮料', '0', '>', '21']),
-            ('饮料  201     >    21', ['饮料', '201', '>', '21']),
-            ('饮料 "201  ">  22', ['饮料', '201  ', '>', '22']),
-            ('饮料 "201  >"  55', ['饮料', '201  >', '55']),
-            ('饮料 "10\\"1  >"   ', ['饮料', '10"1  >']),
+            ('饮料 666<21', ['饮料', '666', '<', '21']),
+            ('饮料 20< 521', ['饮料', '20', '<', '521']),
+            ('饮料 0 <21', ['饮料', '0', '<', '21']),
+            ('饮料  201     <    21', ['饮料', '201', '<', '21']),
+            ('饮料 "201  "<  22', ['饮料', '201  ', '<', '22']),
+            ('饮料 "201  <"  55', ['饮料', '201  <', '55']),
+            ('饮料 "10\\"1  <"   ', ['饮料', '10"1  <']),
             ('"\\"""\\"\\""', ['"', '""']),
             ('"\\\\"  "\\\\233\\\\"', ['\\', '\\233\\']),
         ]
         exception_cases = [
-            ('吃饭>>1', 3),
-            ('吃饭> \\1', 4),
+            ('吃饭<<1', 3),
+            ('吃饭< \\1', 4),
             ('123"2', 5),
             ('"\\', 2),
             ('"\\"', 3),
@@ -61,7 +61,7 @@ class TestTemplateDispatcher(unittest.TestCase):
              f'{today} * "Vultr" "月费"\n'
              '  Assets:Digital:Alipay\n'
              '  Expenses:Tech:Cloud    5 USD\n'),
-            ('vultr > wx',
+            ('vultr < wx',
              f'{today} * "Vultr" "月费"\n'
              '  Assets:Digital:Wechat\n'
              '  Expenses:Tech:Cloud    5 USD\n'),
@@ -69,11 +69,11 @@ class TestTemplateDispatcher(unittest.TestCase):
              f'{today} * "饮料"\n'
              '  Assets:Digital:Alipay\n'
              '  Expenses:Food:Drink    3.0 CNY\n'),
-            ('饮料 3.23>zfb',
+            ('饮料 3.23<zfb',
              f'{today} * "饮料"\n'
              '  Assets:Digital:Alipay\n'
              '  Expenses:Food:Drink    3.23 CNY\n'),
-            ('饮 3.1>wx',
+            ('饮 3.1<wx',
              f'{today} * "饮"\n'
              '  Assets:Digital:Wechat\n'
              '  Expenses:Food:Drink    3.1 CNY\n'),
@@ -84,7 +84,7 @@ class TestTemplateDispatcher(unittest.TestCase):
             ('vultr 123', '参数过多'),
             ('饮 123 456 789', '参数过多'),
             ('饮', '参数过少'),
-            ('vultr > wx zfb', '不支持多目标账户'),
+            ('vultr < wx zfb', '不支持多目标账户'),
         ]
 
         d = TemplateDispatcher(os.path.join(PATH, 'template_config.yml'))
@@ -118,7 +118,7 @@ class TestTemplateDispatcher(unittest.TestCase):
         self.assertIn(expense, ret)
         print(ret)
 
-        ret = d.process('饭 20>wx')
+        ret = d.process('饭 20<wx')
         ret = transaction.stringfy(ret)
         self.assertIn(expense, ret)
         self.assertIn('Assets:Digital:Wechat', ret)

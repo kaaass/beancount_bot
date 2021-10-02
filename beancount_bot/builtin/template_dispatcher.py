@@ -8,9 +8,9 @@ from beancount_bot.dispatcher import Dispatcher
 from beancount_bot.transaction import NotMatchException
 from beancount_bot.util import logger
 
-_CH_CLASS = [' ', '\"', '\\', '>']
+_CH_CLASS = [' ', '\"', '\\', '<']
 _STATE_MAT = [
-    # 空, ", \, >, 其他字符
+    # 空, ", \, <, 其他字符
     [0, 2, -1, 4, 1],  # 0: 空格
     [0, 2, -1, 4, 1],  # 1: 词
     [2, 0, 3, 2, 2],  # 2: 字符串
@@ -105,7 +105,7 @@ class TemplateDispatcher(Dispatcher):
         else:
             account_alias = '没有定义账户'
 
-        return '模板指令格式：指令名 必填参数 [可选参数] > 目标账户\n' \
+        return '模板指令格式：指令名 必填参数 [可选参数] < 目标账户\n' \
                '  1. 指令名可以有多个，记为”(指令名1|指令名2|...)“；\n' \
                '  2. 目标账户可以省略。省略将使用默认账户\n\n' \
                f'当前定义的模板：\n{command_usage}\n\n' \
@@ -140,9 +140,9 @@ class TemplateDispatcher(Dispatcher):
             'date': datetime.date.today().isoformat(),
             'command': cmd,
         }
-        # 解析目标账户（>语法）
-        if '>' in args:
-            split_at = args.index('>')
+        # 解析目标账户（<语法）
+        if '<' in args:
+            split_at = args.index('<')
             args, account = args[:split_at], args[split_at + 1:]
             if len(account) != 1:
                 raise ValueError("语法错误！不支持多目标账户。")
