@@ -26,13 +26,16 @@ class TestTransactionManager(unittest.TestCase):
         # 测试
         manager = TransactionManager([MockDispatcher()], self.tmp_file)
         tx_uuid, tx = manager.create_from_str('')
-        self.assertTrue(transaction.META_TIME in tx.meta)
-        self.assertTrue(transaction.META_UUID in tx.meta)
+
+        with open(self.tmp_file, 'r', encoding='utf-8') as f:
+            data = f.read()
+            self.assertIn(transaction.META_TIME, data)
+            self.assertIn(transaction.META_UUID, data)
 
         tx_str = transaction.stringfy(tx)
-        self.assertTrue('2010-01-01 * "Payee" "Desc"\n' in tx_str)
-        self.assertTrue('Income:Unknown\n' in tx_str)
-        self.assertTrue('Assets:Unknown  1 CNY\n' in tx_str)
+        self.assertIn('2010-01-01 * "Payee" "Desc"\n', tx_str)
+        self.assertIn('Income:Unknown\n', tx_str)
+        self.assertIn('Assets:Unknown  1 CNY\n', tx_str)
 
     def test_create_raw(self):
         # Mock
@@ -69,7 +72,7 @@ class TestTransactionManager(unittest.TestCase):
             f.write(f'; {post}\n')
         # 删除
         delete_tx = manager.remove(tx_uuid)
-        self.assertEqual(tx.meta[transaction.META_UUID], delete_tx.meta[transaction.META_UUID])
+        self.assertEqual(tx_uuid, delete_tx.meta[transaction.META_UUID])
 
         with open(self.tmp_file, 'r', encoding='utf-8') as f:
             data = f.read()
