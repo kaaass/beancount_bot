@@ -4,6 +4,7 @@ from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton, MessageEnt
 
 from beancount_bot import transaction
 from beancount_bot.config import get_config, load_config
+from beancount_bot.dispatcher import Dispatcher
 from beancount_bot.session import get_session, SESS_AUTH, get_session_for, set_session
 from beancount_bot.task import load_task, get_task
 from beancount_bot.transaction import get_manager
@@ -96,30 +97,56 @@ def help_handler(message):
     :param message:
     :return:
     """
-    # 创建消息按键
-    markup = InlineKeyboardMarkup()
+    cmd = message.text
     dispatchers = get_manager().dispatchers
-    for ind, d in zip(range(len(dispatchers)), dispatchers):
-        markup.add(InlineKeyboardButton(f'帮助：{d.get_name()}', callback_data=f'help:{ind}'))
-    # 帮助信息
-    command_usage = [
-        '/start - 鉴权',
-        '/help - 使用帮助',
-        '/reload - 重新加载配置文件',
-        '/task - 查看、运行任务',
-    ]
-    bot.reply_to(message, "记账 Bot\n\n可用指令列表：\n"
-                 + '\n'.join(command_usage)
-                 + "\n\n交易语句帮助请选择对应模块。", reply_markup=markup)
+    if cmd == '/help':
+        # 创建消息按键
+        markup = InlineKeyboardMarkup()
+        for ind, d in zip(range(len(dispatchers)), dispatchers):
+            markup.add(InlineKeyboardButton(f'帮助：{d.get_name()}', callback_data=f'help:{ind}'))
+        # 帮助信息
+        command_usage = [
+            '/start - 鉴权',
+            '/help - 使用帮助',
+            '/reload - 重新加载配置文件',
+            '/task - 查看、运行任务',
+        ]
+        bot.reply_to(message, "记账 Bot\n\n可用指令列表：\n"
+                     + '\n'.join(command_usage)
+                     + "\n\n交易语句语法帮助请选择对应模块，或使用 /help [模块名] 查看。", reply_markup=markup)
+    else:
+        # 显示详细帮助
+        name: str = cmd[6:]
+        flag_found = False
+        for d in dispatchers:
+            if name.lower() == d.get_name().lower():
+                show_usage_for(message, d)
+                flag_found = True
+        if not flag_found:
+            bot.reply_to(message, '对应名称的交易语句处理器不存在！')
+
+
+def show_usage_for(message: Message, d: Dispatcher):
+    """
+    显示特定处理器的使用方法
+    :param message:
+    :param d:
+    :return:
+    """
+    bot.reply_to(message, f'帮助：{d.get_name()}\n\n' + d.get_usage())
 
 
 @bot.callback_query_handler(func=lambda call: call.data[:4] == 'help')
 def callback_help(call: CallbackQuery):
+    """
+    帮助语句详细帮助的回调
+    :param call:
+    :return:
+    """
     try:
         d_id = int(call.data[5:])
         dispatchers = get_manager().dispatchers
-        d = dispatchers[d_id]
-        bot.reply_to(call.message, f'帮助：{d.get_name()}\n\n' + d.get_usage())
+        show_usage_for(call.message, dispatchers[d_id])
     except Exception as e:
         logger.error(f'{call.id}：发生未知错误！', e)
         bot.answer_callback_query(call.id, '发生未知错误！')
