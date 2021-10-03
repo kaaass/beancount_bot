@@ -53,7 +53,7 @@ def load_task() -> Dict[str, ScheduleTask]:
 
         logger.info('注册定时任务：%s', name)
         task: ScheduleTask = clazz(**args)
-        task.register(lambda: task.trigger(bot))
+        task.register(lambda capture_task=task: capture_task.trigger(bot))
         task.config = conf
 
         ret[name] = task
