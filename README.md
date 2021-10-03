@@ -2,6 +2,8 @@
 
 适用于 Beancount 记账的 Telegram 机器人
 
+**该项目正在开发中，可能会发生：API 频繁修改且不向上兼容、发布版本主要功能因 BUG 无法使用等**
+
 ![GitHub](https://img.shields.io/github/license/kaaass/beancount_bot)
 ![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/kaaass/beancount_bot?color=green&label=version)
 ![PyPI](https://img.shields.io/pypi/v/beancount_bot)
