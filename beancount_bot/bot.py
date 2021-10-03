@@ -140,10 +140,16 @@ def task_handler(message):
     tasks = get_task()
     if cmd == '/task':
         # 显示所有任务
-        bot.reply_to(message, '当前注册任务：' + ', '.join(tasks.keys()))
+        all_tasks = ', '.join(tasks.keys())
+        bot.reply_to(message,
+                     f'当前注册任务：{all_tasks}\n'
+                     '可以通过 /task [任务名] 主动触发')
     else:
         # 运行任务
         dest = cmd[6:]
+        if dest not in tasks:
+            bot.reply_to(message, '任务不存在！')
+            return
         task = tasks[dest]
         task.trigger(bot)
 
