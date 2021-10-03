@@ -112,6 +112,10 @@ class TemplateDispatcher(Dispatcher):
                f'默认账户：{default_account}\n支持的账户：\n{account_alias}'
 
     def __init__(self, template_config: str):
+        """
+        :param template_config: 模板配置文件路径。具体语法参见 template.example.yml
+        """
+        super().__init__()
         with open(template_config, 'r', encoding='utf-8') as f:
             data = yaml.full_load(f)
         self.config = data['config']

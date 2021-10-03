@@ -17,21 +17,23 @@ class ScheduleTask:
     """
 
     def __init__(self):
+        """
+        处理器的构造函数将在载入配置时时执行。如启动时、/reload 时
+        构造函数参数通过 **kwargs 形式传入
+        """
         self.config = None
 
     def register(self, fire: callable):
         """
-        注册定时任务
+        注册定时任务。将在构造任务对象后立刻执行。如果不注册，将不会定时触发
         :param fire: 待执行函数
-        :return:
         """
         pass
 
     def trigger(self, bot: TeleBot):
         """
-        触发任务
+        触发任务。任务可通过两种方式触发：定时执行（register 中注册）、/task 任务名
         :param bot: Bot 对象
-        :return:
         """
         pass
 
