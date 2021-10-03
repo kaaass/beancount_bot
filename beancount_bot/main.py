@@ -1,6 +1,6 @@
 import click
 
-from beancount_bot import bot, config as conf
+from beancount_bot import bot, config as conf, __VERSION__
 from beancount_bot.config import load_config, get_config
 from beancount_bot.session import load_session
 from beancount_bot.task import load_task, start_schedule_thread
@@ -9,6 +9,8 @@ from beancount_bot.util import logger
 
 
 @click.command()
+@click.version_option(__VERSION__, '-V', '--version', help='显示版本信息')
+@click.help_option(help='显示帮助信息')
 @click.option('-c', '--config', default='beancount_bot.yml', help='配置文件路径')
 def main(config):
     """
