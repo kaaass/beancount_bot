@@ -10,7 +10,7 @@ class ExampleTask(ScheduleTask):
     示例定时任务
     在配置中加入：
       - name: example
-        class: 'example.ExampleTask'
+        class: 'example.example_task.ExampleTask'
         args:
           time: '18:30'
           info: '广播消息~'

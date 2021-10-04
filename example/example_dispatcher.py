@@ -5,7 +5,7 @@ class ExampleDispatcher(Dispatcher):
     """
     示例交易语句处理器
     在配置中加入：
-      - class: 'example.ExampleDispatcher'
+      - class: 'example.example_dispatcher.ExampleDispatcher'
         args:
           payee: '对方'
     """
