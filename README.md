@@ -43,3 +43,4 @@ pip install beancount_bot
 
 1. [x] ~~支持定时备份~~ 使用定时任务支持
 2. [ ] 支持账单导入
+3. [ ] i18n support
