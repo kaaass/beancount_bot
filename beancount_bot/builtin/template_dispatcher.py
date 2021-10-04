@@ -5,6 +5,7 @@ from typing import List, Mapping
 import yaml
 
 from beancount_bot.dispatcher import Dispatcher
+from beancount_bot.i18n import _
 from beancount_bot.transaction import NotMatchException
 from beancount_bot.util import logger
 
@@ -38,7 +39,7 @@ def split_command(cmd):
         # 状态转移
         state, old_state = _STATE_MAT[state][ch_class], state
         if state == -1:
-            raise ValueError(f"位置 {i}：语法错误！不应出现符号 {ch}。")
+            raise ValueError(_("位置 {pos}：语法错误！不应出现符号 {ch}。").format(pos=i, ch=ch))
         # 进入事件
         if state != old_state and old_state != 3:
             if state in [1, 2, 4]:
@@ -49,7 +50,7 @@ def split_command(cmd):
         if state != 0:
             words[-1] += ch
     if state not in [0, 1, 4]:
-        raise ValueError(f"位置 {len(cmd)}：语法错误！字符串、转义未结束。")
+        raise ValueError(_("位置 {pos}：语法错误！字符串、转义未结束。").format(pos=len(cmd)))
     return words
 
 
@@ -90,26 +91,27 @@ class TemplateDispatcher(Dispatcher):
     """
 
     def get_name(self) -> str:
-        return '模板'
+        return _("模板")
 
     def get_usage(self) -> str:
         if len(self.templates) > 0:
             command_usage = '\n'.join([f'  - {print_one_usage(t)}' for t in self.templates])
         else:
-            command_usage = '没有定义任何模板'
+            command_usage = _("没有定义任何模板")
 
         default_account = self.config['default_account']
 
         if len(self.config['accounts']) > 0:
             account_alias = '\n'.join([f'  {k} - {v}' for k, v in self.config['accounts'].items()])
         else:
-            account_alias = '没有定义账户'
+            account_alias = _("没有定义账户")
 
-        return '模板指令格式：指令名 必填参数 [可选参数] < 目标账户\n' \
-               '  1. 指令名可以有多个，记为”(指令名1|指令名2|...)“；\n' \
-               '  2. 目标账户可以省略。省略将使用默认账户\n\n' \
-               f'当前定义的模板：\n{command_usage}\n\n' \
-               f'默认账户：{default_account}\n支持的账户：\n{account_alias}'
+        return _('模板指令格式：指令名 必填参数 [可选参数] < 目标账户\n'
+                 '  1. 指令名可以有多个，记为”(指令名1|指令名2|...)“；\n'
+                 '  2. 目标账户可以省略。省略将使用默认账户\n\n'
+                 '当前定义的模板：\n{command_usage}\n\n'
+                 '默认账户：{default_account}\n支持的账户：\n{account_alias}') \
+            .format(command_usage=command_usage, default_account=default_account, account_alias=account_alias)
 
     def __init__(self, template_config: str):
         """
@@ -149,25 +151,25 @@ class TemplateDispatcher(Dispatcher):
             split_at = args.index('<')
             args, account = args[:split_at], args[split_at + 1:]
             if len(account) != 1:
-                raise ValueError("语法错误！不支持多目标账户。")
+                raise ValueError(_("语法错误！不支持多目标账户。"))
             arg_map['account'] = self.config['accounts'][account[0]]
         # 参数获取
         if 'args' in template:
             args_need = template['args']
             if len(args) < len(args_need):
-                raise ValueError('参数过少！语法：' + print_one_usage(template))
+                raise ValueError(_("参数过少！语法：{syntax}").format(syntax=print_one_usage(template)))
             arg_map.update({k: v for k, v in zip(args_need, args)})
             args = args[len(args_need):]
         if 'optional_args' in template:
             optional_args = template['optional_args']
             if len(args) > len(optional_args):
-                raise ValueError('参数过多！语法：' + print_one_usage(template))
+                raise ValueError(_("参数过多！语法：{syntax}").format(syntax=print_one_usage(template)))
             arg_map.update({k: v for k, v in zip(optional_args, args)})
             for empty_k in optional_args[len(args):]:
                 arg_map[empty_k] = ''
             args = args[len(optional_args):]
         if len(args) != 0:
-            raise ValueError('参数过多！语法：' + print_one_usage(template))
+            raise ValueError(_("参数过多！语法：{syntax}").format(syntax=print_one_usage(template)))
         # 计算待计算参数
         if 'computed' in template:
             for k, expr in template['computed'].items():

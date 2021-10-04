@@ -10,6 +10,7 @@ from beancount.parser import printer, parser
 
 from beancount_bot.config import get_global, GLOBAL_MANAGER, get_config
 from beancount_bot.dispatcher import Dispatcher
+from beancount_bot.i18n import _
 from beancount_bot.util import load_class
 
 META_UUID = 'tgbot_uuid'
@@ -61,10 +62,12 @@ class TransactionManager:
         :param tx_uuid:
         :return:
         """
-        entries, errors, _ = parser.parse_file(self.bean_file)
+        entries, errors, __ = parser.parse_file(self.bean_file)
         if len(errors) > 0:
-            desc = '\n'.join(map(lambda err: f'行 {err.source["lineno"]}：{err.message}', errors))
-            raise ValueError("账本文件内容错误！\n" + desc)
+            desc = '\n'.join(map(lambda err:
+                                 _('行 {lineno}：{message}')
+                                 .format(lineno=err.source["lineno"], message=err.message), errors))
+            raise ValueError(_("账本文件内容错误！\n{desc}").format(desc=desc))
         # 筛选交易
         to_delete = next(
             filter(lambda tx: tx.meta[META_UUID] == tx_uuid if META_UUID in tx.meta else False, entries),
@@ -105,7 +108,7 @@ class TransactionManager:
                 max_line = i
                 break
         if min_line == -1 or max_line == -1:
-            raise ValueError("交易不存在！")
+            raise ValueError(_("交易不存在！"))
         # 删除
         with open(self.bean_file, 'w', encoding='utf-8') as f:
             f.write(''.join(lines[:min_line] + lines[max_line + 1:]))
@@ -134,7 +137,7 @@ class TransactionManager:
                 continue
         else:
             # 没有匹配
-            raise ValueError("无法识别此交易语法")
+            raise ValueError(_("无法识别此交易语法"))
 
     @property
     def bean_file(self) -> str:

@@ -3,6 +3,8 @@ from typing import Union
 from beancount.core.data import Transaction
 from beancount.parser import parser
 
+from beancount_bot.i18n import _
+
 
 class Dispatcher:
     """
@@ -61,11 +63,11 @@ class Dispatcher:
         获得处理器名称。用于在 /help 中显示选项
         :return: 处理器名称
         """
-        return '未知'
+        return _("未知")
 
     def get_usage(self) -> str:
         """
         获得帮助信息。用于在 /help 中显示具体帮助内容，应当详细
         :return:
         """
-        return '暂无帮助信息。'
+        return _("暂无帮助信息。")

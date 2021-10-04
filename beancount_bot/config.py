@@ -1,5 +1,7 @@
 import yaml
 
+from beancount_bot.i18n import _
+
 global_object_map = {}
 
 GLOBAL_CONFIG = 'config'
@@ -55,7 +57,7 @@ def get_config_obj():
     """
 
     def _exception():
-        raise ValueError('配置未载入！')
+        raise ValueError(_("配置未载入！"))
 
     return get_global(GLOBAL_CONFIG, _exception)
 
