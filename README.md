@@ -19,9 +19,16 @@
 
 ## 安装
 
+### 通过 Pip (Pypi)
+
 ```shell
 pip install beancount_bot
 ```
+
+### 通过 Docker
+
+- [kaaass/beancount_bot_docker](https://github.com/kaaass/beancount_bot_docker)：beancount_bot 的 Docker 镜像
+- [kaaass/beancount_bot_costflow_docker](https://github.com/kaaass/beancount_bot_costflow_docker)：包含 beancount_bot 与 Costflow 插件的 Docker 镜像
 
 ## 使用
 
