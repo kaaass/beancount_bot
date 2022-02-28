@@ -4,6 +4,7 @@ from beancount.core.data import Transaction
 from beancount.parser import parser
 
 from beancount_bot.i18n import _
+from beancount_bot.util import stringify_errors, indent
 
 
 class Dispatcher:
@@ -36,13 +37,24 @@ class Dispatcher:
         :raise NotMatchException: 用户输入不可被处理器处理
         """
         tx_str = self._process_raw(input_str)
-        try:
-            tx = parser.parse_one(tx_str)
-            if isinstance(tx, Transaction):
-                return tx
-            else:
-                return tx_str
-        except AssertionError:
+        # 解析结果
+        entries, errors, __ = parser.parse_string(tx_str, dedent=True)
+        if len(errors) > 0:
+            # 语法错误
+            name = self.get_name()
+            desc = stringify_errors(errors)
+            raise ValueError(_("解析结果存在语法错误！\n处理器: {name}\n解析结果：\n{result}\n错误:\n{desc}")
+                             .format(name=name, result=indent(tx_str), desc=indent(desc)))
+        if len(entries) > 1:
+            raise ValueError(_("不支持解析结果为多条语句"))
+        if len(entries) == 0:
+            # 注释
+            return tx_str
+        # 返回
+        tx = entries[0]
+        if isinstance(tx, Transaction):
+            return tx
+        else:
             return tx_str
 
     def _process_raw(self, input_str: str) -> str:
@@ -52,11 +64,9 @@ class Dispatcher:
         :param input_str:
         :return:
         """
-        return '''
-               2010-01-01 * "Payee" "Desc"
-                 Assets:Unknown
-                 Expenses:Unknown    + 1 CNY
-               '''
+        return '2010-01-01 * "Payee" "Desc"\n' \
+               '  Assets:Unknown\n' \
+               '  Expenses:Unknown  1 CNY\n'
 
     def get_name(self) -> str:
         """

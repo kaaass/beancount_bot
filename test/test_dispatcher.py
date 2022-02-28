@@ -14,3 +14,21 @@ class TestDispatcher(unittest.TestCase):
                          '2010-01-01 * "Payee" "Desc"\n'
                          '  Assets:Unknown\n'
                          '  Expenses:Unknown  1 CNY\n')
+
+    def test_process_raw(self):
+        class MockDispatcher(Dispatcher):
+            def _process_raw(self, input_str: str) -> str:
+                return '2022-01-01 event "Festival" "New Year"\n'
+
+        dispatcher = MockDispatcher()
+        tx = dispatcher.process('')
+        self.assertEqual(tx, '2022-01-01 event "Festival" "New Year"\n')
+
+    def test_bad_syntax(self):
+        class MockDispatcher(Dispatcher):
+            def _process_raw(self, input_str: str) -> str:
+                return 'wrong syntax'
+
+        dispatcher = MockDispatcher()
+        with self.assertRaises(ValueError):
+            dispatcher.process('')

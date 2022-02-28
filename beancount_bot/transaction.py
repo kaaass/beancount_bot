@@ -11,7 +11,7 @@ from beancount.parser import printer, parser
 from beancount_bot.config import get_global, GLOBAL_MANAGER, get_config
 from beancount_bot.dispatcher import Dispatcher
 from beancount_bot.i18n import _
-from beancount_bot.util import load_class
+from beancount_bot.util import load_class, stringify_errors
 
 META_UUID = 'tgbot_uuid'
 META_TIME = 'tgbot_time'
@@ -75,9 +75,7 @@ class TransactionManager:
             except Exception as e:
                 # 如果账本文件解析错误，报解析错误
                 if len(errors) > 0:
-                    desc = '\n'.join(map(lambda err:
-                                         _('行 {lineno}：{message}')
-                                         .format(lineno=err.source["lineno"], message=err.message), errors))
+                    desc = stringify_errors(errors)
                     raise ValueError(_("账本文件内容错误或交易不存在！\n{desc}").format(desc=desc))
                 # 账本文件正常，报其他
                 raise e

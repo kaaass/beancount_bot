@@ -113,39 +113,31 @@ class TestTransactionManager(unittest.TestCase):
     def test_remove_wrong_syntax_tolerance(self):
         # Mock
         poison_str = str(uuid.uuid4())
-        wrong_syntax = True
 
         class MockDispatcher(Dispatcher):
             def _process_raw(self, input_str: str) -> str:
                 return f'''
-                2010-01-01 * "Payee" "{poison_str if wrong_syntax else ''}" {'"Bad syntax"' if wrong_syntax else ''}
+                2010-01-01 * "Payee" "{poison_str}"
                   Income:Unknown
                   Assets:Unknown  1 CNY
                 '''
 
-        # 添加错误语法交易
+        # 添加语法错误内容
         manager = TransactionManager([MockDispatcher()], self.tmp_file)
         with open(self.tmp_file, 'a+', encoding='utf-8') as f:
-            pre = str(uuid.uuid4())
-            f.write(f'; {pre}\n')
-        tx_uuid, _ = manager.create_from_str('')
-        with open(self.tmp_file, 'a+', encoding='utf-8') as f:
-            post = str(uuid.uuid4())
-            f.write(f'; {post}\n')
+            f.write(f'wrong syntax\n')
         # 添加正确语法交易
-        wrong_syntax = False
         correct_tx, _ = manager.create_from_str('')
         # 可以正常删除
         self.assertRaises(ValueError, manager.remove, uuid.uuid4())
         delete_tx = manager.remove(correct_tx)
         self.assertEqual(correct_tx, delete_tx.meta[transaction.META_UUID])
 
-        delete_tx = manager.remove(tx_uuid)
-        self.assertIn(poison_str, delete_tx)
-
         with open(self.tmp_file, 'r', encoding='utf-8') as f:
             data = f.read()
         self.assertNotIn(poison_str, data)
         self.assertNotIn(correct_tx, data)
-        self.assertIn(pre, data)
-        self.assertIn(post, data)
+        self.assertIn('wrong syntax', data)
+
+        with open(self.tmp_file, 'w', encoding='utf-8') as f:
+            f.write(data.replace('wrong syntax', ''))
