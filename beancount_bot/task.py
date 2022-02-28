@@ -79,7 +79,10 @@ def start_schedule_thread(interval=5) -> threading.Thread:
         @classmethod
         def run(cls):
             while True:
-                schedule.run_pending()
+                try:
+                    schedule.run_pending()
+                except Exception as e:
+                    logger.warn('定时任务出错：%s', e)
                 time.sleep(interval)
 
     global _schedule_thread
