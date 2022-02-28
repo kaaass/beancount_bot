@@ -63,19 +63,24 @@ class TransactionManager:
         :return:
         """
         entries, errors, __ = parser.parse_file(self.bean_file)
-        if len(errors) > 0:
-            desc = '\n'.join(map(lambda err:
-                                 _('行 {lineno}：{message}')
-                                 .format(lineno=err.source["lineno"], message=err.message), errors))
-            raise ValueError(_("账本文件内容错误！\n{desc}").format(desc=desc))
         # 筛选交易
         to_delete = next(
             filter(lambda tx: tx.meta[META_UUID] == tx_uuid if META_UUID in tx.meta else False, entries),
             None
         )
         if to_delete is None:
-            # 可能是非交易语句
-            return self._remove_comment_wrapped(tx_uuid)
+            # 不存在此交易，可能是非交易语句
+            try:
+                return self._remove_comment_wrapped(tx_uuid)
+            except Exception as e:
+                # 如果账本文件解析错误，报解析错误
+                if len(errors) > 0:
+                    desc = '\n'.join(map(lambda err:
+                                         _('行 {lineno}：{message}')
+                                         .format(lineno=err.source["lineno"], message=err.message), errors))
+                    raise ValueError(_("账本文件内容错误或交易不存在！\n{desc}").format(desc=desc))
+                # 账本文件正常，报其他
+                raise e
         # 统计删除行。避免删除其他语句。
         min_line = to_delete.meta['lineno']
         max_line = min_line
