@@ -10,7 +10,7 @@ from beancount_bot.session import get_session, SESS_AUTH, get_session_for, set_s
 from beancount_bot.session_config import SESSION_CONFIG
 from beancount_bot.task import load_task, get_task
 from beancount_bot.transaction import get_manager
-from beancount_bot.util import logger, stringify_tags
+from beancount_bot.util import logger
 
 apihelper.ENABLE_MIDDLEWARE = True
 

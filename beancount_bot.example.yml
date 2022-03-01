@@ -24,7 +24,7 @@ transaction:
     # class 必须包含完整模块名，第三方插件可以设置 PYTHONPATH 载入
     # args 参考每个处理器各自的文档
     # 目前内建了模板处理器，配置如下即可
-    - class: 'beancount_bot.builtin.template_dispatcher.TemplateDispatcher'
+    - class: 'beancount_bot.builtin.TemplateDispatcher'
       args:
         template_config: 'template.yml'
 
