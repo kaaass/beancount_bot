@@ -28,6 +28,17 @@ def stringify_errors(errors: list) -> str:
                          .format(lineno=err.source["lineno"], message=err.message), errors))
 
 
+def stringify_tags(tags, human_readable=False):
+    """
+    格式化 Beancount 标签列表
+    """
+    if human_readable:
+        if len(tags) == 0:
+            return _('无')
+        return ', '.join(f'#{t}' for t in tags)
+    return ' '.join(f'#{t}' for t in tags)
+
+
 def indent(text: str, prefix: str = '  ') -> str:
     """
     文本增加缩进

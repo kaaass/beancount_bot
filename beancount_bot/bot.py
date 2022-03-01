@@ -6,10 +6,11 @@ from beancount_bot import transaction
 from beancount_bot.config import get_config, load_config
 from beancount_bot.dispatcher import Dispatcher
 from beancount_bot.i18n import _
-from beancount_bot.session import get_session, SESS_AUTH, get_session_for, set_session
+from beancount_bot.session import get_session, SESS_AUTH, get_session_for, set_session, SESS_TX_TAGS
+from beancount_bot.session_config import SESSION_CONFIG
 from beancount_bot.task import load_task, get_task
 from beancount_bot.transaction import get_manager
-from beancount_bot.util import logger
+from beancount_bot.util import logger, stringify_tags
 
 apihelper.ENABLE_MIDDLEWARE = True
 
@@ -24,6 +25,7 @@ def session_middleware(bot_instance, message):
     :param message:
     :return:
     """
+    bot_instance.session_user_id = message.from_user.id
     bot_instance.session = get_session_for(message.from_user.id)
 
 
@@ -112,6 +114,8 @@ def help_handler(message):
             _("/help - 使用帮助"),
             _("/reload - 重新加载配置文件"),
             _("/task - 查看、运行任务"),
+            _("/set - 设置用户特定配置"),
+            _("/get - 获取用户特定配置"),
         ]
         help_text = \
             _("记账 Bot\n\n可用指令列表：\n{command}\n\n交易语句语法帮助请选择对应模块，或使用 /help [模块名] 查看。").format(
@@ -185,6 +189,46 @@ def task_handler(message):
         task.trigger(bot)
 
 
+##################
+# Session 特有配置 #
+##################
+
+@bot.message_handler(commands=['set', 'get'])
+def session_config_handler(message):
+    """
+    设置 session 配置
+    :param message:
+    :return:
+    """
+    if not check_auth():
+        bot.reply_to(message, _("请先进行鉴权！"))
+        return
+
+    # 解析指令
+    is_set = message.text.startswith('/set')
+    cmd: str = message.text[4:]
+    conf = cmd.split(maxsplit=1)
+    # 显示指令帮助
+    if len(conf) < 1:
+        desc = '\n'.join(v.make_help(k, is_set=is_set) for k, v in SESSION_CONFIG.items())
+        bot.reply_to(message, _("使用方法：\n{desc}").format(desc=desc))
+        return
+    # 获得指令对象
+    conf = conf[0]
+    if conf not in SESSION_CONFIG:
+        bot.reply_to(message, _("配置不存在！命令使用方法请参考 {cmd}")
+                     .format(cmd='/set' if is_set else '/get'))
+        return
+    obj_conf = SESSION_CONFIG[conf]
+    # 获得参数
+    cmd = cmd[len(conf) + 1:]
+    # 调用
+    if is_set:
+        obj_conf.set(cmd, bot, message)
+    else:
+        obj_conf.get(cmd, bot, message)
+
+
 #######
 # 交易 #
 #######
@@ -204,7 +248,7 @@ def transaction_query_handler(message: Message):
     manager = get_manager()
     try:
         # 准备交易上下文
-        tags = get_config('transaction.tags', [])
+        tags = get_config('transaction.tags', []) + get_session(message.from_user.id, SESS_TX_TAGS, [])
         # 处理交易
         tx_uuid, tx = manager.create_from_str(message.text, add_tags=tags)
         # 创建消息按键
@@ -216,7 +260,7 @@ def transaction_query_handler(message: Message):
         logger.info(f'{message.from_user.id}：无法添加交易', exc_info=e)
         bot.reply_to(message, e.args[0])
     except Exception as e:
-        logger.error(f'{message.from_user.id}：发生未知错误！添加交易失败。', exe_info=e)
+        logger.error(f'{message.from_user.id}：发生未知错误！添加交易失败。', exc_info=e)
         bot.reply_to(message, _("发生未知错误！添加交易失败。"))
 
 

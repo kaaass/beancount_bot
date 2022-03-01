@@ -7,6 +7,7 @@ from beancount_bot.config import get_config
 from beancount_bot.util import logger
 
 SESS_AUTH = 'auth'
+SESS_TX_TAGS = 'tx_tags'
 
 _session_cache: Dict[str, dict] = {}
 
