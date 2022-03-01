@@ -152,7 +152,7 @@ def callback_help(call: CallbackQuery):
         dispatchers = get_manager().dispatchers
         show_usage_for(call.message, dispatchers[d_id])
     except Exception as e:
-        logger.error(f'{call.id}：发生未知错误！', e)
+        logger.error(f'{call.id}：发生未知错误！', exc_info=e)
         bot.answer_callback_query(call.id, _("发生未知错误！"))
 
 
@@ -213,10 +213,10 @@ def transaction_query_handler(message: Message):
         # 回复
         bot.reply_to(message, transaction.stringfy(tx), reply_markup=markup)
     except ValueError as e:
-        logger.info(f'{message.from_user.id}：无法添加交易', e)
+        logger.info(f'{message.from_user.id}：无法添加交易', exc_info=e)
         bot.reply_to(message, e.args[0])
     except Exception as e:
-        logger.error(f'{message.from_user.id}：发生未知错误！添加交易失败。', e)
+        logger.error(f'{message.from_user.id}：发生未知错误！添加交易失败。', exe_info=e)
         bot.reply_to(message, _("发生未知错误！添加交易失败。"))
 
 
@@ -243,10 +243,10 @@ def callback_withdraw(call: CallbackQuery):
                               message_id=call.message.message_id,
                               entities=[code_format])
     except ValueError as e:
-        logger.info(f'{call.id}：无法创建交易', e)
+        logger.info(f'{call.id}：无法撤回交易', exc_info=e)
         bot.answer_callback_query(call.id, e.args[0])
     except Exception as e:
-        logger.error(f'{call.id}：发生未知错误！撤回交易失败。', e)
+        logger.error(f'{call.id}：发生未知错误！撤回交易失败。', exc_info=e)
         bot.answer_callback_query(call.id, _("发生未知错误！撤回交易失败。"))
 
 
