@@ -68,7 +68,7 @@ class TransactionManager:
         :param tx_uuid:
         :return:
         """
-        entries, errors, _ = parser.parse_file(self.bean_file)
+        entries, errors, __ = parser.parse_file(self.bean_file)
         # 筛选交易
         to_delete = next(
             filter(lambda tx: tx.meta[META_UUID] == tx_uuid if META_UUID in tx.meta else False, entries),
