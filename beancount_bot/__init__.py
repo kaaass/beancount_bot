@@ -1,5 +1,6 @@
 __AUTHOR__ = 'KAAAsS'
 __LICENSE__ = "MIT"
+from beancount_bot.__version__ import __VERSION__
 
 from beancount_bot import builtin
 from beancount_bot import dispatcher

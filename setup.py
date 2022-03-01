@@ -2,10 +2,14 @@ from pathlib import Path
 
 from setuptools import setup
 
-__VERSION__ = "1.2.0"
+__VERSION__ = "1.2.1"
 
 root = Path(__file__).parent
 long_description = (root / "README.md").read_text()
+
+# 写版本号
+with open("beancount_bot/__version__.py", "w") as f:
+    f.write(f"__VERSION__ = '{__VERSION__}'")
 
 setup(
     name='beancount-bot',
