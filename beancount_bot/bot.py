@@ -186,7 +186,11 @@ def task_handler(message):
             bot.reply_to(message, _("任务不存在！"))
             return
         task = tasks[dest]
-        task.trigger(bot)
+        try:
+            task.trigger(bot)
+        except Exception as e:
+            logger.error(f'{message.from_user.id}：发生未知错误！执行任务失败。', exc_info=e)
+            bot.reply_to(message, _("发生未知错误！执行任务失败。"))
 
 
 ##################
