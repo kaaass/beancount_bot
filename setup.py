@@ -1,12 +1,11 @@
+from pathlib import Path
+
 from setuptools import setup
 
-from beancount_bot import __VERSION__
+__VERSION__ = "1.2.0"
 
-with open("requirements.txt", "r") as f:
-    install_requires = f.read().splitlines()
-
-with open("README.md", "r", encoding='utf-8') as f:
-    long_description = f.read()
+root = Path(__file__).parent
+long_description = (root / "README.md").read_text()
 
 setup(
     name='beancount-bot',
@@ -18,7 +17,13 @@ setup(
             'beancount_bot = beancount_bot:main'
         ]
     },
-    install_requires=install_requires,
+    install_requires=[
+        'beancount==2.*',
+        'click==8.0.4',
+        'pyTelegramBotAPI==4.1.0',
+        'PyYAML==5.4.1',
+        'schedule==1.1.0',
+    ],
     python_requires='>=3.6.0',
     license='MIT',
     author='KAAAsS',
