@@ -11,7 +11,7 @@ from beancount.parser import printer, parser
 from beancount_bot.config import get_global, GLOBAL_MANAGER, get_config
 from beancount_bot.dispatcher import Dispatcher
 from beancount_bot.i18n import _
-from beancount_bot.util import load_class, stringify_errors
+from beancount_bot.util import load_class, stringify_errors, logger
 
 META_UUID = 'tgbot_uuid'
 META_TIME = 'tgbot_time'
@@ -32,12 +32,15 @@ class TransactionManager:
         self.dispatchers = dispatchers
         self.__bean_file = bean_file
 
-    def create(self, tx: Union[Transaction, str]) -> Tuple[Uuid, Union[Transaction, str]]:
+    def create(self, tx: Union[Transaction, str], add_tags=None) -> Tuple[Uuid, Union[Transaction, str]]:
         """
         创建交易
         :param tx:
+        :param add_tags: 给交易添加的标签
         :return:
         """
+        if add_tags is None:
+            add_tags = []
         tx_uuid = Uuid(uuid.uuid4())
         if isinstance(tx, str):
             # 保存至账本
@@ -49,7 +52,10 @@ class TransactionManager:
             tx = copy.deepcopy(tx)
             tx.meta[META_UUID] = tx_uuid
             tx.meta[META_TIME] = str(datetime.datetime.now())
+            # 添加标签
+            tx = tx._replace(tags=set(tx.tags).union(add_tags))
             # 保存至账本
+            logger.debug("创建交易：%s", tx)
             with open(self.bean_file, 'a+', encoding='utf-8') as f:
                 printer.print_entry(tx, file=f)
             return tx_uuid, tx
@@ -62,7 +68,7 @@ class TransactionManager:
         :param tx_uuid:
         :return:
         """
-        entries, errors, __ = parser.parse_file(self.bean_file)
+        entries, errors, _ = parser.parse_file(self.bean_file)
         # 筛选交易
         to_delete = next(
             filter(lambda tx: tx.meta[META_UUID] == tx_uuid if META_UUID in tx.meta else False, entries),
@@ -117,14 +123,14 @@ class TransactionManager:
             f.write(''.join(lines[:min_line] + lines[max_line + 1:]))
         return ''.join(lines[min_line + 1:max_line])[:-1]
 
-    def create_from_str(self, tx_str) -> Union[Tuple[Uuid, Transaction], Tuple[None, str]]:
+    def create_from_str(self, tx_str, **kwargs) -> Union[Tuple[Uuid, Transaction], Tuple[None, str]]:
         """
         从交易语法创建交易
         :param tx_str:
         :return:
         """
         tx = self._parse_transaction(tx_str)
-        tx_uuid, _ = self.create(tx)
+        tx_uuid, _ = self.create(tx, **kwargs)
         return tx_uuid, tx
 
     def _parse_transaction(self, tx_str) -> Transaction:

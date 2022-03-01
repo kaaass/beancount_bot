@@ -28,6 +28,10 @@ transaction:
       args:
         template_config: 'template.yml'
 
+  # 添加在交易上的标签
+  tags:
+    - beancount-bot
+
 schedule:
   # 定时任务定义
   # name：定时任务名，可以用 /task name 主动触发

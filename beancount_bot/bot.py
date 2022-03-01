@@ -203,7 +203,10 @@ def transaction_query_handler(message: Message):
     # 已鉴权则处理交易
     manager = get_manager()
     try:
-        tx_uuid, tx = manager.create_from_str(message.text)
+        # 准备交易上下文
+        tags = get_config('transaction.tags', [])
+        # 处理交易
+        tx_uuid, tx = manager.create_from_str(message.text, add_tags=tags)
         # 创建消息按键
         markup = InlineKeyboardMarkup()
         markup.add(InlineKeyboardButton(_("撤回交易"), callback_data=f'withdraw:{tx_uuid}'))
