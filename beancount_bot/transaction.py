@@ -159,8 +159,12 @@ class TransactionManager:
         for k, v in params.items():
             bean_file = bean_file.replace(f'{{{k}}}', v)
         # 创建父文件夹
-        path = os.path.dirname(os.path.realpath(bean_file))
-        os.makedirs(path, exist_ok=True)
+        try:
+            path = os.path.dirname(os.path.realpath(bean_file))
+            os.makedirs(path, exist_ok=True)
+        except OSError as e:
+            logger.error("无法创建账本文件夹", exc_info=e)
+            raise ValueError(_("无法创建账本文件夹！"))
         return bean_file
 
 

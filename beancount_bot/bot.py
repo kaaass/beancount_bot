@@ -263,6 +263,9 @@ def transaction_query_handler(message: Message):
     except ValueError as e:
         logger.info(f'{message.from_user.id}：无法添加交易', exc_info=e)
         bot.reply_to(message, e.args[0])
+    except OSError as e:
+        logger.error(f'{message.from_user.id}：账本文件读写错误！添加交易失败。', exc_info=e)
+        bot.reply_to(message, _("账本文件读写错误！添加交易失败。"))
     except Exception as e:
         logger.error(f'{message.from_user.id}：发生未知错误！添加交易失败。', exc_info=e)
         bot.reply_to(message, _("发生未知错误！添加交易失败。"))
@@ -293,6 +296,9 @@ def callback_withdraw(call: CallbackQuery):
     except ValueError as e:
         logger.info(f'{call.id}：无法撤回交易', exc_info=e)
         bot.answer_callback_query(call.id, e.args[0])
+    except OSError as e:
+        logger.error(f'{call.id}：账本文件读写错误！撤回交易失败。', exc_info=e)
+        bot.answer_callback_query(call.id, _("账本文件读写错误！撤回交易失败。"))
     except Exception as e:
         logger.error(f'{call.id}：发生未知错误！撤回交易失败。', exc_info=e)
         bot.answer_callback_query(call.id, _("发生未知错误！撤回交易失败。"))
