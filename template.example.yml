@@ -25,12 +25,27 @@ templates:
   #   1. 内建变量：account（账户）、date（日期）、command（用户输入的指令，在多指令时可能不同）
   #   2. 各种参数：参数、可选参数、计算参数都可以引用
 
+  # 简单使用示例，若输入语句 "vultr"，则会生成如下交易（日期实际会是当日日期，后略）
+  # 2022-01-01 * "Vultr" "月费"
+  #   Assets:Digital:Alipay
+  #   Expenses:Tech:Cloud    5 USD
+  # 若指定目标账户，可输入语句 "vultr < wx"，则会生成如下交易
+  # 2022-01-01 * "Vultr" "月费"
+  #   Assets:Digital:Wechat
+  #   Expenses:Tech:Cloud    5 USD
   - command: 'vultr'
     template: |
       {date} * "Vultr" "月费"
         {account}
         Expenses:Tech:Cloud    5 USD
 
+  # 稍复杂的使用示例。
+  # 1. 可以使用多个指令名，具体使用时选择其一即可，在模板中可以用 {command} 引用
+  # 2. 可以使用参数，参数默认看作文本。在模板中可以用 {名称} 引用
+  # 如输入 "咖啡 15"，则会生成如下交易
+  # 2022-01-01 * "" "咖啡"
+  #   Assets:Digital:Alipay
+  #   Expenses:Food:Drink    15 CNY
   - command: [ '饮料', '饮', '咖啡' ]
     args:
       - 'price'
@@ -39,6 +54,14 @@ templates:
         {account}
         Expenses:Food:Drink    {price} CNY
 
+  # 复杂的使用示例。
+  # 1. 可以使用可选参数。可选参数在使用指令时接在参数后面，按照先后顺序依次解析，默认为空
+  # 2. 可以使用 computed 来通过 Python 表达式扩充模板功能。如此处 hour 获取了当前时间
+  #    的小时；然后通过 expense 的表达式根据当前的小时信息确定对应支出是哪一顿饭
+  # 如在 2022-07-21 11:32 输入 "饭 23 KFC"，则会生成如下交易
+  # 2022-07-21 * "KFC" "饭"
+  #   Assets:Digital:Alipay
+  #   Expenses:Food:Dinner:Lunch  23 CNY
   - command: '饭'
     args:
       - 'price'

@@ -3,16 +3,16 @@ log:
   level: 'INFO'
 
 bot:
-  # 代理
+  # 代理，若无 Telegram 连接问题可删去
   proxy: 'http://127.0.0.1:8080'
 
   # Telegram 机器人 Token
   token: ''
 
-  # 鉴权用令牌。第一次进入机器人时用于校验身份
+  # 鉴权用令牌。第一次进入机器人时（即 /start 后）用于校验身份
   auth_token: '123456'
 
-  # 机器人会话文件路径
+  # 机器人会话文件路径。用于存储鉴权状态、用户特有配置等等
   session_file: 'bot.session'
 
 transaction:
@@ -29,6 +29,7 @@ transaction:
         template_config: 'template.yml'
 
   # 添加在交易上的标签
+  # 可以使用 Bot 指令 /set tags <标签名> 添加用户专用标签
   tags:
     - beancount-bot
 
@@ -38,9 +39,10 @@ schedule:
   # class：定时任务类
   # args：创建任务需要的参数
 
-  # 定时任务示例：定时更新价格
+  # 定时任务示例：使用 bean-price 定时更新价格
   # 使用内建任务类：beancount_bot.builtin.DailyCommandTask
   # 该类在每日 time 时执行指令，之后广播 message 消息
+  # 详细的关于 bean-price 的配置方式可参考官方文档：https://beancount.github.io/docs/fetching_prices_in_beancount.html
   - name: price
     class: 'beancount_bot.builtin.DailyCommandTask'
     args:
